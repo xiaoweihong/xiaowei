@@ -1,4 +1,4 @@
-###1. weixin_alert.py 是一个利用企业微信报警的功能，结合zabbix
-{ALERT.SENDTO}
-{ALERT.SUBJECT}
-{ALERT.MESSAGE}
+##运维相关的文件
+
+tools        是一些有用的脚本
+config		 是一些软件的常用配置文件

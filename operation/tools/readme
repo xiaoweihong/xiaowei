@@ -1,0 +1,4 @@
+###1. weixin_alert.py 是一个利用企业微信报警的功能，结合zabbix
+{ALERT.SENDTO}
+{ALERT.SUBJECT}
+{ALERT.MESSAGE}
