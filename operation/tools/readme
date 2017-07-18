@@ -2,3 +2,7 @@
 {ALERT.SENDTO}
 {ALERT.SUBJECT}
 {ALERT.MESSAGE}
+###2. pro_deploy.sh 项目部署脚本
+用法
+Usage: ./pro_deply.sh [ deploy | rollback-list | rollback-pro ver]
+部署/查看版本/回滚版本
