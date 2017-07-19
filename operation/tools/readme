@@ -6,3 +6,5 @@
 用法
 Usage: ./pro_deply.sh [ deploy | rollback-list | rollback-pro ver]
 部署/查看版本/回滚版本
+###3. waf项目 是赵班长根据lua-nginx-module修改做的waf功能
+#具体的安装，在项目说明里有
