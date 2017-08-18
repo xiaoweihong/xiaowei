@@ -1,0 +1,10 @@
+[groups]
+adm = cheng 
+user = tom,jim 
+
+[project1:/] 
+@adm = rw 
+* = r 
+[project2:/] 
+@adm = rw 
+* = r 

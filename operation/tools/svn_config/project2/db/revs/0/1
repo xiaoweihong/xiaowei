@@ -1,0 +1,25 @@
+id: 0-1.0.r1/0
+type: dir
+count: 0
+cpath: /A
+copyroot: 0 /
+
+PLAIN
+K 1
+A
+V 14
+dir 0-1.0.r1/0
+END
+ENDREP
+id: 0.0.r1/102
+type: dir
+pred: 0.0.r0/17
+count: 1
+text: 1 59 30 30 274f16e929a8b3ce7f45554c59abcb4c
+cpath: /
+copyroot: 0 /
+
+_0.0.t0-0 add-dir false false /A
+
+
+102 226
