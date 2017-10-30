@@ -39,5 +39,7 @@
 ###4. vps_baidu.py  使用baidupan备份VPS
 
 		pip install baidupan
+###5.log.py	
+	
 	
 参考：http://solos.github.io/baidupan/
