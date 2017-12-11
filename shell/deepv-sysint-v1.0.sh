@@ -2,31 +2,40 @@
 
 HOSTIP=`hostname -I|cut -d ' ' -f 1`
 NTPIP="172.16.1.209"
+
+logdateformat="$(date "+%Y-%m-%d %H:%M:%S")"
+
 function Msg(){
-        if [ $? -eq 0 ];then
-          echo "$1" >>/tmp/sysinit-$(date +%F).log
-        else
-          echo "$1" >> /tmp/sysinit-$(date +%F)-error.log
-        fi
+    if [ $? -eq 0 ];then
+      echo -e "$logdateformat\t$1" >> /root/sysinit-$(date +%F).log
+    else
+      echo -e "$logdateformat\t$1" >> /root/sysinit-$(date +%F)-error.log
+    fi
 }
 
 
 function AddUser(){
-	id admin >/dev/null
-	if [ $? -ne 0 ];then
-	   useradd -m admin
-	fi
-	
-	echo "admin:admin123"|chpasswd admin
-	
-	Msg "admin用户添加成功。" 
-	
+	id admin &>/dev/null
+	Msg "add admin begin--------"
+
+	useradd -m admin -s /bin/bash
+	echo "admin:admin123"|chpasswd admin	
+	Msg "user-->admin add" 
+	Msg "add admin end----------"
+
+	id dell &>/dev/null
+	Msg "add dell begin--------"
+
+	useradd -m dell -s /bin/bash
+	echo "dell:dell@2017"|chpasswd dell	
+	Msg "user-->dell add" 
+	Msg "add dell end----------"
 }
 
 function CheckSysVersion(){
 	result=`cat /etc/*-release|grep "Ubuntu 14.04.5 LTS"|wc -l`
 	
-	Msg "版本Ubuntu 14.04.5 LTS正确"
+	Msg "Version Ubuntu 14.04.5 LTS "
 	
 }
 
@@ -34,16 +43,17 @@ function CheckSysPartion(){
 	rootSize=`df -h|grep '/$'|awk '{print $2}'|awk -F 'G' '{print $1}'`
 	res=`echo "$rootSize > 80"|bc`
 	if [ $res -eq 1 ];then
-		echo "根目录大于80G"
-		Msg "更目录容量正常"
+		echo "/ dictroy bigger than 80G"
+		Msg "/ dictroy "
 	fi
 }
 
 function SyncSysTime(){
 	ntphost="$NTPIP"
 	ntpdate $ntphost >/dev/null
+	hwclokc -w
 	
-	Msg "时间同步成功 `date "+%Y-%m-%d %H:%M:%S"`"
+	Msg "sync time"
 	
 }
 
@@ -65,9 +75,9 @@ function CheckDiskInfo(){
 	#diskInfoCount=`fdisk -l|grep "/dev/sdb"|wc -l`
 	diskInfoCount=`ls -l /dev/sdb* |grep "/dev/sdb"|wc -l`
 	if [ $diskInfoCount -ne 0 ];then
-		Msg "数据盘存在,开始分区"
+		Msg "/dev/sdb exist,begin to parted"
 	else
-		Msg "数据盘不存在，请检查系统"
+		Msg "/dev/sdb is not exist，please check system"
 		exit 6
 	fi
 }
@@ -77,13 +87,13 @@ function PartionData(){
 	if [ "$DISKTYPE" = "" ];then
 	   DISKTYPE="TB"
 	fi
-	echo "磁盘类型是:$DISKTYPE"
+	echo "volume type:$DISKTYPE"
 	DISKSIZE=`parted -l|grep /dev/sdb|awk '{print $3 }'`
 	if [ ! -d /data ];then
 		mkdir -p /data
-		Msg "/data目录创建成功。"
+		Msg "/data dictory create "
 	else
-		Msg "目录已经存在"
+		Msg "/data dictory is exist"
 	fi
 	CheckDiskInfo
 	parted /dev/sdb mklabel gpt yes
@@ -92,35 +102,34 @@ function PartionData(){
 	parted /dev/sdb print
 
 	sleep 3
-	Msg "分区成功"
+	Msg "parted"
 	mkfs.ext4 /dev/sdb1 
 	
-	Msg "数据盘格式化完成"
+	Msg "data volume parted"
 	
 
 	mount /dev/sdb1 /data
 	
-	Msg "数据盘挂载完成"
+	Msg "data volume mount"
 	
 	
 	echo "/dev/sdb1  /data  ext4 defaults 0 0" >>/etc/fstab
 	
-	Msg "写入开机挂载数据目录成功。"
+	Msg "write to /etc/fstab"
 	
 
 	ln -s /data /home/admin/data
 	
-	Msg "admin家目录下软连接创建成功。"
+	Msg "data soft link create"
 
 }
 
 function main(){
+	SyncSysTime
 	AddUser
 	CheckSysVersion
-	CheckSysPartion
-	SyncSysTime
+	CheckSysPartion	
 	CheckDiskInfo
 	PartionData
-
 }
 main
