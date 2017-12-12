@@ -3,7 +3,7 @@
 HOSTIP=`hostname -I|cut -d ' ' -f 1`
 NTPIP="172.16.1.209"
 
-LOG_PATH="/tmp"
+LOG_PATH="/root"
 DATE_N=`date "+%Y-%m-%d %H:%M:%S"`
 USER_N=`whoami`
 function log_info ()
@@ -17,8 +17,6 @@ echo "${DATE_N} ${USER_N} execute $0 [INFO] $@" >>$LOG_PATH/deepv-install.log #�
 
 function log_error ()
 {
-	DATE_N=`date "+%Y-%m-%d %H:%M:%S"`
-	USER_N=`whoami`
 	echo -e "\033[41;37m ${DATE_N} ${USER_N} execute $0 [ERROR] $@ \033[0m"  >>$LOG_PATH/deepv-install-error.log #执行失败日志打印路径
 }
 
@@ -42,16 +40,19 @@ function AddUser(){
 
 	useradd -m admin -s /bin/bash
 	echo "admin:admin123"|chpasswd admin	
-	log_info "user-->admin add" 
+	fn_log "user-->admin add"
+    sed -i "20a admin   ALL=(ALL:ALL) ALL" /etc/sudoers
+    log_info "add admin to sudoers file"
 	log_info "add admin end----------"
 
-	id dell &>/dev/null
-	log_info "add dell begin--------"
-
-	useradd -m dell -s /bin/bash
-	echo "dell:dell@2017"|chpasswd dell	
-	log_info "user-->dell add" 
-	log_info "add dell end----------"
+    
+ #   id dell &>/dev/null
+#	log_info "add dell begin--------"
+#
+#	useradd -m dell -s /bin/bash
+#	echo "dell:dell@2017"|chpasswd dell	
+#	log_info "user-->dell add" 
+#	log_info "add dell end----------"
 }
 
 function CheckSysVersion(){
@@ -73,24 +74,27 @@ function CheckSysPartion(){
 function SyncSysTime(){
 	ntphost="$NTPIP"
 	ntpdate $ntphost >/dev/null
-	hwclokc -w
+	hwclock -w
 	
 	fn_log "sync time"
 	
 }
 
 
-function CheckNetInfo(){
-	netinfo=`ifconfig -a|egrep "eth|em"`
-	netcount=`$netinfo|wc -l`
-	nettype=`$netinfo|awk 'NR>1{print $1}'|cut -c 1-2`
-	#if [ $netcount -eq 2 ];then
-		#if [ "$nettype"x = "em"x ];then
-
-		#elif [  "$nettype"x  =  "et"x  ]; then
-				#statements
-		#fi
-	#fi
+function CheckNetInfo(){	
+	nettype=`ifconfig -a|egrep "eth|em"|awk '{print $1}'|head -1`
+	
+cat >/etc/network/interface<EOF
+auto lo
+iface lo inet loopback
+auto $nettype
+iface $nettype inet static
+address 192.168.12.12
+gateway 192.168.12.254
+netmask 255.255.255.0
+dns-nameservers 192.168.12.1
+EOF
+	
 }
 
 function CheckDiskInfo(){
@@ -150,8 +154,8 @@ function main(){
 	SyncSysTime
 	AddUser
 	CheckSysVersion
-	CheckSysPartion	
-	CheckDiskInfo
+	CheckSysPartion
 	PartionData
+    CheckNetInfo
 }
 main
