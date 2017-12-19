@@ -84,7 +84,7 @@ function SyncSysTime(){
 function CheckNetInfo(){	
 	nettype=`ifconfig -a|egrep "eth|em"|awk '{print $1}'|head -1`
 	
-cat >/etc/network/interface<EOF
+cat >/etc/network/interfaces<EOF
 auto lo
 iface lo inet loopback
 auto $nettype
